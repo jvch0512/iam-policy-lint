@@ -1,0 +1,19 @@
+9 findings
+CRITICAL  IAM001 admin-everything.json [TemporaryDevAccess]
+          Allow * on *: this is full administrator access
+HIGH      IAM003 ci-deployer.json [DeployLambda]
+          sensitive actions on Resource *: lambda:UpdateFunctionCode
+HIGH      IAM002 ci-deployer.json [Logs]
+          service-wide wildcard logs:*: grant only the actions needed
+HIGH      IAM003 ci-deployer.json [PassTheRole]
+          sensitive actions on Resource *: iam:PassRole
+MEDIUM    IAM006 ci-deployer.json [ManageOwnPolicies]
+          privilege escalation path (scoped resource, still review who can reach it): iam:CreatePolicyVersion, iam:AttachRolePolicy
+HIGH      IAM004 everything-but.json [AllButBilling]
+          Allow with NotAction grants everything except the listed actions
+MEDIUM    IAM008 everything-but.json [(policy)]
+          missing or old Version: use 2012-10-17, or policy variables are not evaluated
+CRITICAL  IAM005 public-bucket.json [AnyAccountCanAssume]
+          AWS principal * without a Condition: any AWS account
+CRITICAL  IAM005 public-bucket.json [ReadForEveryone]
+          Principal * without a Condition: anyone on the internet (fine only for content that is meant to be public)

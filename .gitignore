@@ -1,0 +1,5 @@
+_build/
+iam-policy-lint
+*.cm*
+*.o
+tests/run

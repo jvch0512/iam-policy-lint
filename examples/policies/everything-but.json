@@ -1,0 +1,5 @@
+{
+  "Statement": [
+    { "Sid": "AllButBilling", "Effect": "Allow", "NotAction": ["aws-portal:*", "budgets:*"], "Resource": "*" }
+  ]
+}
