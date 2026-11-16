@@ -2,6 +2,8 @@
 
 An IAM policy that says `Allow *` on `*` is an incident waiting for a date. Most real risk is subtler: a `PassRole` on every resource, a policy that can rewrite its own permissions, a bucket open to every AWS account. iam-policy-lint reads policy JSON and flags exactly those patterns.
 
+![Terminal demo of iam-policy-lint on its sample data](docs/demo.svg)
+
 **Live demo:** https://jvch0512.github.io/iam-policy-lint/ (a report on the synthetic policies in `examples/`)
 
 OCaml, standard library only, including its own strict JSON parser.
@@ -47,3 +49,7 @@ make test    # 36 checks
 ```
 
 MIT.
+
+## Validated on real data
+
+This tool was run on public corpora and the false positives it produced were fixed. Corpus, counts and bugs found are in [docs/validation.md](docs/validation.md).

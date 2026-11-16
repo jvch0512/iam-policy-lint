@@ -25,7 +25,7 @@ let () =
     let rel f = if Sys.is_directory path then String.sub f (String.length base + 1) (String.length f - String.length base - 1) else Filename.basename f in
     let all = List.concat_map (fun f ->
         match Json.parse (read_file f) with
-        | doc -> Lint.lint ~file:(rel f) doc
+        | doc -> Lint.lint_file ~file:(rel f) doc
         | exception Json.Parse_error m -> prerr_string (Printf.sprintf "error: %s: %s\n" f m); exit 2) (collect path) in
     print_string (if !html then Lint.render_html all else Lint.render_text all);
     let floor = match !fail_on with Some "critical" -> 0 | Some _ -> 1 | None -> -1 in

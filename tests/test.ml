@@ -18,6 +18,14 @@ let () =
   check "glob: case-insensitive" (Lint.glob "IAM:createaccesskey" "iam:CreateAccessKey");
   check "glob: no match" (not (Lint.glob "s3:*" "iam:PassRole"));
   check "glob: middle wildcard" (Lint.glob "iam:Attach*Policy" "iam:AttachRolePolicy");
+  (* wrappers produced by the AWS CLI, found by running on the real aws_managed_policies set *)
+  let lf text = List.map (fun (f : Lint.finding) -> f.rule) (Lint.lint_file ~file:"t" (Json.parse text)) in
+  let doc = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"*\",\"Resource\":\"*\"}]}" in
+  check "get-policy-version wrapper" (lf ("{\"PolicyVersion\":{\"Document\":" ^ doc ^ ",\"VersionId\":\"v1\"}}") = [ "IAM001" ]);
+  check "get-role-policy wrapper" (lf ("{\"RoleName\":\"r\",\"PolicyName\":\"p\",\"PolicyDocument\":" ^ doc ^ "}") = [ "IAM001" ]);
+  check "authorization-details finds every document" (List.length (lf ("{\"Policies\":[{\"PolicyVersionList\":[{\"Document\":" ^ doc ^ "}]},{\"PolicyVersionList\":[{\"Document\":" ^ doc ^ "}]}]}")) = 2);
+  check "json without a policy is ignored, not reported" (lf "{\"hello\":\"world\"}" = []);
+  check "bare policy still works" (lf doc = [ "IAM001" ]);
   (* rules *)
   check "IAM001 admin" (has "IAM001" (stmt "{\"Effect\":\"Allow\",\"Action\":\"*\",\"Resource\":\"*\"}"));
   check "admin is not also reported as escalation" (not (has "IAM006" (stmt "{\"Effect\":\"Allow\",\"Action\":\"*\",\"Resource\":\"*\"}")));

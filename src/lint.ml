@@ -71,6 +71,21 @@ let lint ~file (doc : Json.t) : finding list =
     (statements doc);
   List.sort (fun a b -> compare (sev_rank a.severity, a.file, a.stmt, a.rule) (sev_rank b.severity, b.file, b.stmt, b.rule)) !out
 
+(* Policies come bare, or wrapped by the AWS CLI (get-policy-version, get-role-policy,
+   get-account-authorization-details): find every object that has a Statement. *)
+let rec documents (j : Json.t) : Json.t list =
+  match j with
+  | Json.Obj kv when List.mem_assoc "Statement" kv -> [ j ]
+  | Json.Obj kv -> List.concat_map (fun (_, v) -> documents v) kv
+  | Json.Arr l -> List.concat_map documents l
+  | _ -> []
+
+let lint_file ~file (j : Json.t) : finding list =
+  match documents j with
+  | [] -> (match j with Json.Obj kv when List.mem_assoc "Version" kv -> lint ~file j | _ -> [])
+  | [ d ] -> lint ~file d
+  | ds -> List.concat (List.mapi (fun i d -> lint ~file:(Printf.sprintf "%s#%d" file (i + 1)) d) ds)
+
 let esc s =
   let b = Buffer.create (String.length s) in
   String.iter (function '&' -> Buffer.add_string b "&amp;" | '<' -> Buffer.add_string b "&lt;" | '>' -> Buffer.add_string b "&gt;" | '"' -> Buffer.add_string b "&quot;" | c -> Buffer.add_char b c) s;
